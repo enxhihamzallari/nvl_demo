@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "jsx": "react",
+    "skipLibCheck": true,
+    "outDir": "lib",
+    // "typeRoots": ["/src/types", "/node_modules/@types"]
+  },
+  "include": ["src"]
+}
