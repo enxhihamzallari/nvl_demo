@@ -1,5 +1,4 @@
 import type {
-	NVL,
 	Node as NVLNode,
 	Relationship as NVLRelationship,
   } from "@neo4j-nvl/base";
@@ -76,7 +75,8 @@ export const styleGraph = (
     relationships: NVLRelationship[];
     recordObjectMap: Map<string, RecordShape>;
   },
-  label = ""
+  label = "",
+  selectedNodeIds: string[] = []
 ): {
   styledNodes: NVLNode[];
   styledRelationships: NVLRelationship[];
@@ -85,14 +85,17 @@ export const styleGraph = (
   const positions: { id: string; x: number; y: number }[] = [];
   const { avgLon, avgLat } = getAvgLatLon(data);
 
-  const styledNodes: NVLNode[] = data.nodes.map((node, i) => {
+  const styledNodes: NVLNode[] = data.nodes.map((node) => {
     const originalNode = data.recordObjectMap.get(node.id);
+    const isSelected = selectedNodeIds.includes(node.id);
     const newNode = {
       ...node,
       color: getUniqueColorForLabel(originalNode?.labels[0]),
       captions: Object.values(originalNode?.properties).map((value) => ({
         value: value?.toString(),
       })),
+      borderColor: isSelected ? "red" : "black", 
+      borderWidth: isSelected ? 5 : 1, 
     };
 
     if (

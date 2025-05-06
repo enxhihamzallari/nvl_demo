@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "webpack"
+    "build": "webpack",
+    "generate:triggers": "dotnet run --project \"C:\\Users\\EnxhiPC\\Documents\\TUWien\\S25\\AME\\csharp\\neo4j-constraint-generator-master\\Neo4jConstraintGenerator\\Neo4jConstraintGenerator.csproj\""
   },
   "devDependencies": {
     "@types/react": "^19.0.10",
