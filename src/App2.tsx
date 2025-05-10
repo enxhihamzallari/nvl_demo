@@ -20,8 +20,8 @@ export const App2 = () => {
     const nvlRef = useRef<NVL | null>(null);
     const [availableLabels, setAvailableLabels] = useState<string[]>([]);
     const [selectedLabel, setSelectedLabel] = useState<string>("");
+    const [selectedSubLabel, setSelectedSubLabel] = useState<string>("");
     const [triggerFileContent, setTriggerFileContent] = useState<string>("");
-
 
     const clearLabel = () => {
       setLabel(null);
@@ -48,15 +48,27 @@ export const App2 = () => {
         return "An unknown error occurred.";
       };
     const createNode = async () => {
-      if (!newNodeName || !selectedLabel) {
-        alert("Please enter a node name and/or select a label.");
+      if (!newNodeName ) {
+        alert("Please enter a node name.");
+        return;
+       };
+       if ( !selectedLabel) {
+        alert("Please select a label.");
+        return;
+       };
+       if ( !selectedSubLabel) {
+        alert("Please select a label.");
         return;
        };
 
       const query = `
-        MERGE (n:${selectedLabel} {name: $name})
+        MERGE (n:${selectedLabel} :${selectedSubLabel} {name: $name})
         RETURN n, labels(n) AS n_labels
       `;
+      console.log("Running node creation query with:", {
+        query,
+        params: { name: newNodeName, selectedLabel, selectedSubLabel },
+      });
   try {
       const result = await connect(query, { name: newNodeName });
   
@@ -120,8 +132,21 @@ export const App2 = () => {
         console.error("Failed to fetch labels", error);
       }
     };
+    const fetchSubLabels = async () => {
+      try {
+        const result = await runRawQuery("CALL db.labels()");
+        if (result) {
+          const labels = result.records.map((record: any) => record.get('label'));
+          setAvailableLabels(labels);
+          if (labels.length > 0) setSelectedSubLabel(labels[0]); // Default select first label
+        }
+      } catch (error) {
+        console.error("Failed to fetch sub labels", error);
+      }
+    };
 
     fetchLabels();
+    fetchSubLabels();
   }, []);
 
       const mouseEventCallbacks: MouseEventCallbacks = {
@@ -243,7 +268,8 @@ export const App2 = () => {
       
     useEffect(() => {
       connect(
-        "MATCH (a)-[r]->(b) RETURN a, labels(a) AS a_labels, r, b, labels(b) AS b_labels LIMIT 100"
+        "MATCH (n) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m;"
+      //  "MATCH (a)-[r]->(b) RETURN a, labels(a) AS a_labels, r, b, labels(b) AS b_labels LIMIT 100"
       )
         .then((result) => {
           if (!result) return;
@@ -384,6 +410,16 @@ export const App2 = () => {
                 style={{ marginRight: "0.5rem" }}
             >
                 <option value="">Select Node Type</option>
+                {availableLabels.map((label) => (
+                <option key={label} value={label}>{label}</option>
+                ))}
+            </select>
+            <select
+                value={selectedSubLabel}
+                onChange={(e) => setSelectedSubLabel(e.target.value)}
+                style={{ marginRight: "0.5rem" }}
+            >
+                <option value="">Select Subnode Type</option>
                 {availableLabels.map((label) => (
                 <option key={label} value={label}>{label}</option>
                 ))}
